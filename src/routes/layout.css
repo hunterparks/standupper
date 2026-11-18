@@ -1,0 +1,16 @@
+@import 'tailwindcss';
+/* Unlayered rules would beat every Tailwind utility; putting the app styles in
+   the components layer keeps utilities (e.g. `f-label mb-0`) winning, the same
+   order the old twind runtime produced. */
+@import '../lib/style.css' layer(components);
+
+/* Tailwind v3 (twind) behaviour the original UI relies on:
+   hover variants also fire on touch, and buttons show a pointer. */
+@custom-variant hover (&:hover);
+
+@layer base {
+	button:not(:disabled),
+	[role='button']:not(:disabled) {
+		cursor: pointer;
+	}
+}

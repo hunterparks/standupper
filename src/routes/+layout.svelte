@@ -1,0 +1,10 @@
+<script lang="ts">
+	import './layout.css';
+	import type { LayoutProps } from './$types';
+
+	let { children }: LayoutProps = $props();
+</script>
+
+<div class="min-h-screen">
+	{@render children()}
+</div>
