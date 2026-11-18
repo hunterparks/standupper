@@ -209,13 +209,13 @@
 		}
 	};
 
-	const handleStartStandup = () => {
+	const handleStartStandup = (path = `/standup/${standupId}`) => {
 		const activeUsers = session?.users.filter((user) => !user.inactive) || [];
 		if (activeUsers.length === 0) {
 			error = 'No active users to start standup';
 			return;
 		}
-		goto(`/standup/${standupId}`);
+		goto(path);
 	};
 
 	const goHome = () => (window.location.href = '/');
@@ -441,11 +441,18 @@
 
 					<!-- Start Standup Button -->
 					<button
-						onclick={handleStartStandup}
+						onclick={() => handleStartStandup()}
 						disabled={!session?.users.some((user) => !user.inactive)}
 						class="btn btn-primary btn-lg w-full"
 					>
 						Start Standup
+					</button>
+					<button
+						onclick={() => handleStartStandup(`/standup/${standupId}/3d`)}
+						disabled={!session?.users.some((user) => !user.inactive)}
+						class="btn btn-ghost btn-lg mt-3 w-full"
+					>
+						🌲 Start 3D Standup
 					</button>
 				</div>
 			</div>

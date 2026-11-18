@@ -7,6 +7,7 @@ A SvelteKit app on Cloudflare Workers + D1 to help software teams manage their d
 - Create and join standup sessions
 - Manage team members
 - Randomized speaking order with timer
+- 3D standup: an optional walk down a forest trail, one sign tree per speaker, dressed for the current theme
 - Neo-brutalist interface with five selectable accent colors
 - Seasonal and holiday site themes (Automatic, Standard, plus 12 seasonal ones), selectable per standup
 - Simple, intuitive user experience
@@ -46,6 +47,18 @@ Themes change the paper, ink, background pattern and seasonal decorations. They 
 
 The date rules live in `src/lib/season.ts`. Themes are applied via `<html data-theme="…">` (see `src/lib/themes.svelte.ts` and `src/lib/style.css`). To avoid a flash of the wrong theme, `src/hooks.server.ts` splices `seasonalTheme()` into an inline script in `src/app.html` that sets the theme before first paint, so that function must stay self-contained (a unit test checks this). Falling particles are hidden when the viewer prefers reduced motion.
 
+## 3D Standup
+
+"Start 3D Standup" on the session page opens `/standup/[id]/3d`, a separate page (`ForestStandupPage.svelte`) that runs the same lineup as a walk down a procedurally generated low-poly forest built with three.js. Each speaker's name hangs on a board nailed to a tree beside the trail, with arrow signs for who's on deck and in the hole, and the controls hang beneath as wooden planks (also on the keyboard: → next, ← back, Y yeet, B bij). The timer is a groove in the board that fills with the accent color. When the lineup is done, the camera walks to the end-of-the-trail arch and the page moves on to the regular complete page.
+
+The forest follows the standup's theme (`src/lib/forest/forestThemes.ts`): sky, light, foliage, ground, weather (falling leaves, snow, petals, confetti, fireflies) and extras like pumpkins, bunting, fireworks and a rainbow. Everything is generated from code, with no model or texture downloads, and three.js is only loaded on this page.
+
+- `src/lib/forest/terrain.ts`: trail, terrain and station layout (pure math, unit tested)
+- `src/lib/forest/chunk.ts`: deterministic forest slabs of instanced trees and ground details
+- `src/lib/forest/signs.ts`: canvas-painted wooden signs
+- `src/lib/forest/effects.ts`: sky, particles, fireworks, rainbow
+- `src/lib/forest/scene.ts`: stations, controls, camera walk, input
+
 ## Stack
 
 - **SvelteKit 3 / Svelte 5** with `@sveltejs/adapter-cloudflare`, deployed as the `standupper` Worker at https://standupper.stup.dev
@@ -63,7 +76,8 @@ Pages are client-rendered (`ssr = false`), like the original React SPA.
 │   ├── app.html                     # Shell + pre-paint theme script
 │   ├── hooks.server.ts              # Inlines seasonalTheme() into the shell
 │   ├── lib/
-│   │   ├── components/              # SessionPage, StandupPage, CompletePage
+│   │   ├── components/              # SessionPage, StandupPage, ForestStandupPage, CompletePage
+│   │   ├── forest/                  # three.js scene for the 3D standup
 │   │   ├── server/db.ts             # D1 queries (shared with the cleanup Worker)
 │   │   ├── server/http.ts           # D1 binding + { error } responses
 │   │   ├── jokes.ts                 # crocs.dad joke prefetch
