@@ -21,11 +21,9 @@
 			// src/lib/season.ts and src/lib/types.ts; StandupAppearance in
 			// src/lib/themes.svelte.ts takes over once the app loads.
 			(function () {
-				var seasonalTheme = /*SEASONAL_THEME_FN*/ function () {
-					return 'standard';
-				};
+				var seasonalTheme = /*SEASONAL_THEME_FN*/ null;
 				var themes = /*RESOLVED_THEMES*/ [];
-				var theme = seasonalTheme(new Date());
+				var theme = seasonalTheme ? seasonalTheme(new Date()) : 'standard';
 				var m = location.pathname.match(/^\/(?:session|standup|complete)\/([^/]+)/);
 				if (m) {
 					try {

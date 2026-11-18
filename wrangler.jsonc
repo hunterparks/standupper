@@ -11,6 +11,7 @@
 	"workers_dev": true,
 	"preview_urls": true,
 	"observability": { "enabled": true },
+	"routes": [{ "pattern": "standupper.stup.dev", "custom_domain": true }],
 	"d1_databases": [
 		{
 			"binding": "DB",
