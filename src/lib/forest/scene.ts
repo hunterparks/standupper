@@ -29,6 +29,7 @@ import {
 	rng,
 	SIGN_TREE_OFFSET,
 	smoothstep,
+	STATION_SPACING,
 	stationSide,
 	stationZ,
 	terrainHeight,
@@ -43,6 +44,8 @@ export interface ForestOptions {
 	accent: string;
 	standupName: string;
 	reducedMotion: boolean;
+	/** Seconds to walk the distance between two neighboring sign trees. */
+	walkSeconds: number;
 	onAction: (action: ForestAction) => void;
 }
 
@@ -1017,7 +1020,10 @@ export class ForestScene {
 		const dist = Math.abs(toPose.pos.z - fromPos.z);
 		this.updateChunks(toPose.pos.z);
 
-		const duration = this.opts.reducedMotion ? 0.6 : Math.max(1.6, (dist / 26) * 3.6);
+		const per = this.opts.walkSeconds;
+		const duration = this.opts.reducedMotion
+			? Math.min(0.6, per)
+			: Math.max(per * 0.45, (dist / STATION_SPACING) * per);
 		return new Promise((resolve) => {
 			this.trip = {
 				to,

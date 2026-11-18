@@ -52,7 +52,13 @@ export interface Standup {
 	timer_duration_minutes: number; // 0 means no time limit (indeterminate progress bar)
 	color: AccentColor;
 	theme: ThemeChoice;
+	walk_seconds: number; // 3D standup: seconds to walk between sign trees
 }
+
+/** Allowed range and default for Standup.walk_seconds. */
+export const WALK_SECONDS_MIN = 0.5;
+export const WALK_SECONDS_MAX = 60;
+export const WALK_SECONDS_DEFAULT = 3.6;
 
 export interface User {
 	id: number; // Auto-incrementing integer
@@ -85,6 +91,7 @@ export interface UpdateStandupRequest {
 	timer_duration_minutes?: number;
 	color?: AccentColor;
 	theme?: ThemeChoice;
+	walk_seconds?: number;
 }
 
 export interface StandupSession {

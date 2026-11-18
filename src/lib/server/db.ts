@@ -1,4 +1,4 @@
-import { ACCENT_COLORS, THEME_CHOICES } from '../types.ts';
+import { ACCENT_COLORS, THEME_CHOICES, WALK_SECONDS_DEFAULT } from '../types.ts';
 import type {
 	AccentColor,
 	BulkUpdateInactiveRequest,
@@ -18,6 +18,7 @@ interface StandupRow {
 	timer_duration_minutes: number;
 	color: string;
 	theme: string;
+	walk_seconds: number;
 }
 
 interface UserRow {
@@ -36,7 +37,10 @@ const toStandup = (row: StandupRow): Standup => ({
 	last_login: row.last_login || new Date().toISOString(),
 	timer_duration_minutes: row.timer_duration_minutes ?? 1,
 	color: ACCENT_COLORS.includes(row.color as AccentColor) ? (row.color as AccentColor) : 'green',
-	theme: THEME_CHOICES.includes(row.theme as ThemeChoice) ? (row.theme as ThemeChoice) : 'automatic'
+	theme: THEME_CHOICES.includes(row.theme as ThemeChoice)
+		? (row.theme as ThemeChoice)
+		: 'automatic',
+	walk_seconds: row.walk_seconds ?? WALK_SECONDS_DEFAULT
 });
 
 const toUser = (row: UserRow): User => ({
@@ -62,7 +66,8 @@ export async function createStandup(db: D1Database, data: CreateStandupRequest):
 		last_login: now,
 		timer_duration_minutes: 1,
 		color: 'green',
-		theme: 'automatic'
+		theme: 'automatic',
+		walk_seconds: WALK_SECONDS_DEFAULT
 	};
 }
 
@@ -90,6 +95,10 @@ export async function updateStandup(
 	if (data.theme !== undefined) {
 		updates.push('theme = ?');
 		values.push(data.theme);
+	}
+	if (data.walk_seconds !== undefined) {
+		updates.push('walk_seconds = ?');
+		values.push(data.walk_seconds);
 	}
 	if (updates.length === 0) return null;
 

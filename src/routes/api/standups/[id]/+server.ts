@@ -1,7 +1,7 @@
 import { json } from '@sveltejs/kit';
 import { getStandup, updateStandup } from '#lib/server/db.ts';
 import { db, fail } from '#lib/server/http.ts';
-import { ACCENT_COLORS, THEME_CHOICES } from '#lib/types.ts';
+import { ACCENT_COLORS, THEME_CHOICES, WALK_SECONDS_MAX, WALK_SECONDS_MIN } from '#lib/types.ts';
 import type { UpdateStandupRequest } from '#lib/types.ts';
 import type { RequestHandler } from './$types';
 
@@ -24,6 +24,17 @@ export const PUT: RequestHandler = async ({ params, request }) => {
 	}
 	if (data.theme !== undefined && !THEME_CHOICES.includes(data.theme)) {
 		return fail(400, 'invalid theme');
+	}
+	if (data.walk_seconds !== undefined) {
+		const v = data.walk_seconds;
+		if (
+			typeof v !== 'number' ||
+			!Number.isFinite(v) ||
+			v < WALK_SECONDS_MIN ||
+			v > WALK_SECONDS_MAX
+		) {
+			return fail(400, `walk_seconds must be between ${WALK_SECONDS_MIN} and ${WALK_SECONDS_MAX}`);
+		}
 	}
 
 	const standup = await updateStandup(db(), params.id, data);

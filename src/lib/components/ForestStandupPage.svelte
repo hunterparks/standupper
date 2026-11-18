@@ -73,6 +73,7 @@
 						accent: appearance.colorMeta.hex,
 						standupName: data.standup.name,
 						reducedMotion,
+						walkSeconds: data.standup.walk_seconds,
 						onAction: handleAction
 					});
 				} catch (err) {

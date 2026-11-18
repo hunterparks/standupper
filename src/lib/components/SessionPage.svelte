@@ -1,7 +1,13 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import type { Standup, StandupSession, UpdateStandupRequest, User } from '#lib/types.ts';
-	import { ACCENT_COLORS, THEME_CHOICES } from '#lib/types.ts';
+	import {
+		ACCENT_COLORS,
+		THEME_CHOICES,
+		WALK_SECONDS_DEFAULT,
+		WALK_SECONDS_MAX,
+		WALK_SECONDS_MIN
+	} from '#lib/types.ts';
 	import { COLOR_META, seasonalTheme, StandupAppearance, THEME_META } from '#lib/themes.svelte.ts';
 
 	let { standupId }: { standupId: string } = $props();
@@ -11,6 +17,7 @@
 	let error = $state('');
 	let newUserName = $state('');
 	let timerInput = $state('');
+	let walkInput = $state('');
 	let savingTimer = $state(false);
 	let settingsOpen = $state(false);
 	let addUserOpen = $state(false);
@@ -29,6 +36,7 @@
 			const data: StandupSession = await response.json();
 			session = data;
 			timerInput = String(data.standup.timer_duration_minutes ?? 1);
+			walkInput = String(data.standup.walk_seconds ?? WALK_SECONDS_DEFAULT);
 		} catch (err) {
 			error = err instanceof Error ? err.message : 'Failed to load session';
 		} finally {
@@ -49,13 +57,18 @@
 			error = 'Timer duration must be a non-negative whole number of minutes';
 			return;
 		}
+		const walk = Number(walkInput);
+		if (!Number.isFinite(walk) || walk < WALK_SECONDS_MIN || walk > WALK_SECONDS_MAX) {
+			error = `Time between trees must be ${WALK_SECONDS_MIN}–${WALK_SECONDS_MAX} seconds`;
+			return;
+		}
 
 		savingTimer = true;
 		try {
 			const response = await fetch(`/api/standups/${standupId}`, {
 				method: 'PUT',
 				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ timer_duration_minutes: parsed })
+				body: JSON.stringify({ timer_duration_minutes: parsed, walk_seconds: walk })
 			});
 			if (!response.ok) {
 				const errorData = (await response.json().catch(() => ({}))) as { error?: string };
@@ -64,6 +77,7 @@
 			const updated: Standup = await response.json();
 			if (session) session = { ...session, standup: updated };
 			timerInput = String(updated.timer_duration_minutes);
+			walkInput = String(updated.walk_seconds);
 		} catch (err) {
 			error = err instanceof Error ? err.message : 'Failed to update settings';
 		} finally {
@@ -273,26 +287,44 @@
 						{#if settingsOpen}
 							<form onsubmit={handleSaveTimer} class="px-4 pb-4">
 								<label for="timer-duration" class="f-label">Timer duration (minutes)</label>
-								<div class="flex gap-3">
-									<input
-										id="timer-duration"
-										type="number"
-										min={0}
-										step={1}
-										bind:value={() => timerInput, (v) => (timerInput = v == null ? '' : String(v))}
-										class="field flex-1"
-									/>
-									<button
-										type="submit"
-										disabled={savingTimer ||
-											timerInput === '' ||
-											Number(timerInput) === (session?.standup.timer_duration_minutes ?? 1)}
-										class="btn btn-primary"
-									>
-										{savingTimer ? 'Saving…' : 'Save'}
-									</button>
-								</div>
+								<input
+									id="timer-duration"
+									type="number"
+									min={0}
+									step={1}
+									bind:value={() => timerInput, (v) => (timerInput = v == null ? '' : String(v))}
+									class="field w-full"
+								/>
 								<p class="mono t-faint mt-2 text-xs">Set to 0 for no time limit.</p>
+
+								<label for="walk-seconds" class="f-label mt-5">
+									3D: time between trees (seconds)
+								</label>
+								<input
+									id="walk-seconds"
+									type="number"
+									min={WALK_SECONDS_MIN}
+									max={WALK_SECONDS_MAX}
+									step={0.1}
+									bind:value={() => walkInput, (v) => (walkInput = v == null ? '' : String(v))}
+									class="field w-full"
+								/>
+								<p class="mono t-faint mt-2 text-xs">
+									How long the 3D standup takes to walk to the next speaker.
+								</p>
+
+								<button
+									type="submit"
+									disabled={savingTimer ||
+										timerInput === '' ||
+										walkInput === '' ||
+										(Number(timerInput) === (session?.standup.timer_duration_minutes ?? 1) &&
+											Number(walkInput) ===
+												(session?.standup.walk_seconds ?? WALK_SECONDS_DEFAULT))}
+									class="btn btn-primary mt-3"
+								>
+									{savingTimer ? 'Saving…' : 'Save'}
+								</button>
 
 								<!-- svelte-ignore a11y_label_has_associated_control -->
 								<label class="f-label mt-5">Color</label>
@@ -452,7 +484,7 @@
 						disabled={!session?.users.some((user) => !user.inactive)}
 						class="btn btn-ghost btn-lg mt-3 w-full"
 					>
-						🌲 Start 3D Standup
+						Start 3D Standup
 					</button>
 				</div>
 			</div>
