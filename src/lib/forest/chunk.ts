@@ -109,14 +109,16 @@ export function plantTree(
 	z: number,
 	size: number,
 	r: () => number,
-	opts: { trunkH?: number; branchStart?: number } = {}
+	opts: { trunkH?: number; branchStart?: number; upright?: boolean } = {}
 ) {
 	const sink = 0.15;
 	const theme = kit.theme;
 	const y = terrainHeight(x, z) - sink;
 	const barkTint = _c.setScalar(0.85 + r() * 0.3).clone();
-	const lean = (r() - 0.5) * 0.08;
-	_e.set(lean, r() * Math.PI * 2, (r() - 0.5) * 0.08);
+	// Draw the lean even when upright so the rest of the tree's rolls don't shift
+	const tilt = opts.upright ? 0 : 0.08;
+	const lean = (r() - 0.5) * tilt;
+	_e.set(lean, r() * Math.PI * 2, (r() - 0.5) * tilt);
 	_q.setFromEuler(_e);
 
 	if (kind === 'round') {

@@ -130,7 +130,12 @@ class Station {
 		// The sign tree, and a partner across the trail for bunting
 		const trees = newTreeBatches();
 		const big = theme.snowy ? 'bare' : 'round';
-		plantTree(kit, trees, big, tx, zs, 1.35, r, { trunkH: 5.8, branchStart: 0.72 });
+		plantTree(kit, trees, big, tx, zs, 1.35, r, {
+			trunkH: 5.8,
+			branchStart: 0.72,
+			// Boards hang a few cm off the bark; any lean pushes the trunk through them
+			upright: true
+		});
 		const partnerX = px - side * (SIGN_TREE_OFFSET + 0.9);
 		const partnerZ = zs - 3;
 		const partnerKind = pickTreeKind(kit, r);
