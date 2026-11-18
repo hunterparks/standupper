@@ -29,8 +29,6 @@
 	const appearance = new StandupAppearance(standupId, () => session?.standup);
 
 	const forestTheme = $derived(FOREST_THEMES[appearance.resolvedTheme]);
-	const total = $derived(completedUserQueue.length + userQueue.length);
-	const position = $derived(completedUserQueue.length + 1);
 	const reducedMotion =
 		typeof matchMedia !== 'undefined' && matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -260,9 +258,6 @@
 			<div class="tag">
 				<span aria-hidden="true">{THEME_META[appearance.resolvedTheme].icon}</span>
 				<span class="tag-name">{session.standup.name}</span>
-				{#if !finishing && current}
-					<span class="tag-count">{position}/{total}</span>
-				{/if}
 			</div>
 			<a class="chip chip--quiet" href="/session/{standupId}" title="Leave the trail">✕</a>
 		</header>
@@ -404,16 +399,6 @@
 		overflow: hidden;
 		text-overflow: ellipsis;
 		white-space: nowrap;
-	}
-
-	.tag-count {
-		font-family: var(--font-mono);
-		font-weight: 700;
-		font-size: 0.75rem;
-		color: #2a170c;
-		background: var(--accent);
-		border-radius: 999px;
-		padding: 0.05rem 0.5rem;
 	}
 
 	.chip {
