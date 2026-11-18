@@ -2,7 +2,8 @@
 	"extends": "$app/tsconfig",
 	"compilerOptions": {
 		"strict": true,
-		"types": ["$app/types", "./worker-configuration.d.ts"]
+		"types": ["$app/types", "./worker-configuration.d.ts"],
+		"checkJs": false
 	},
 	"include": ["src", "workers", "vite.config.ts", "prettier.config.js"]
 }
